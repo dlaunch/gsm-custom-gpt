@@ -1,0 +1,103 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222 12% 20%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 12% 20%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 12% 20%;
+
+    --primary: 355 85% 58%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 100% 66%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 220 15% 96%;
+    --muted-foreground: 220 10% 55%;
+
+    --accent: 210 90% 66%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 222.2 84% 4.9%;
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 220 30% 98%;
+    --sidebar-foreground: 222 12% 25%;
+    --sidebar-primary: 355 85% 58%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 20% 96%;
+    --sidebar-accent-foreground: 222 12% 25%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 222.2 84% 4.9%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "ss01", "ss02", "cv01", "cv02", "cv03";
+  }
+
+  /* Scrollbar customizations */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/30 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/50;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply backdrop-blur-sm bg-white/50 border border-white/20 shadow-sm;
+  }
+  
+  .chat-bubble {
+    @apply px-4 py-3 rounded-2xl max-w-[85%] break-words leading-relaxed;
+  }
+  
+  .user-bubble {
+    @apply bg-primary text-primary-foreground chat-bubble animate-fade-in;
+  }
+  
+  .ai-bubble {
+    @apply bg-muted chat-bubble animate-fade-in;
+  }
+  
+  .sidebar-conversation {
+    @apply px-3 py-2 rounded-lg hover:bg-sidebar-accent transition-all duration-200 cursor-pointer truncate;
+  }
+  
+  .sidebar-conversation.active {
+    @apply bg-sidebar-accent font-medium;
+  }
+  
+  .loading-dot {
+    @apply h-2 w-2 bg-muted-foreground/60 rounded-full animate-pulse;
+  }
+}
