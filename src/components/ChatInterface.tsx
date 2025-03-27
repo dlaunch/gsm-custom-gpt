@@ -206,90 +206,136 @@ export function ChatInterface() {
         
         <div 
           ref={chatContainerRef}
-          className="flex-1 overflow-y-auto p-6"
+          className="flex-1 overflow-y-auto p-6 flex flex-col"
           style={{ position: 'relative' }}
         >
-          <div className="max-w-4xl mx-auto">
-            {isLoadingMessages ? (
-              <div className="flex justify-center items-center h-16">
-                <LoadingMessage />
-              </div>
-            ) : isNewConversation ? (
-              <div className="h-full flex items-center justify-center">
-                <div className="text-center max-w-md w-full">
-                  <h2 className="text-2xl font-bold mb-2 text-foreground/80">GSM Custom GPT</h2>
-                  <p className="text-muted-foreground mb-6">Start a conversation with your AI assistant</p>
-                  
-                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                    <Button 
-                      variant="outline" 
-                      className="flex items-center gap-2" 
-                      onClick={() => handlePromptShortcut("Create a comprehensive blog post about the following topic: ")}
-                    >
-                      <BookText className="h-4 w-4" />
-                      Create a blog post
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      className="flex items-center gap-2" 
-                      onClick={() => handlePromptShortcut("Create a detailed whitepaper on the following subject: ")}
-                    >
-                      <FileText className="h-4 w-4" />
-                      Create a whitepaper
-                    </Button>
-                  </div>
+          {isLoadingMessages ? (
+            <div className="flex justify-center items-center h-16">
+              <LoadingMessage />
+            </div>
+          ) : isNewConversation ? (
+            <div className="flex-1 flex flex-col">
+              {/* Header content stays at the top */}
+              <div className="text-center mb-8">
+                <h2 className="text-2xl font-bold mb-2 text-foreground/80">GSM Custom GPT</h2>
+                <p className="text-muted-foreground mb-6">Start a conversation with your AI assistant</p>
+                
+                <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
+                  <Button 
+                    variant="outline" 
+                    className="flex items-center gap-2" 
+                    onClick={() => handlePromptShortcut("Create a comprehensive blog post about the following topic: ")}
+                  >
+                    <BookText className="h-4 w-4" />
+                    Create a blog post
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="flex items-center gap-2" 
+                    onClick={() => handlePromptShortcut("Create a detailed whitepaper on the following subject: ")}
+                  >
+                    <FileText className="h-4 w-4" />
+                    Create a whitepaper
+                  </Button>
                 </div>
               </div>
-            ) : (
-              messages.map((message) => (
-                <ChatMessage key={message.id} message={message} />
-              ))
-            )}
-            
-            {isLoading && <LoadingMessage />}
-            
-            <div ref={messageEndRef} />
-          </div>
+              
+              {/* Chatbox at the top of the remaining space (flex-start) instead of centered */}
+              <div className="flex-1 flex items-start justify-center">
+                <div className="max-w-3xl w-full">
+                  <form 
+                    onSubmit={handleSendMessage} 
+                    className="flex flex-col w-full"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <div className="flex-1 relative">
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 z-10">
+                          <ModelSelector
+                            chatModel={chatModel}
+                            setChatModel={setChatModel}
+                            modelVersion={modelVersion}
+                            setModelVersion={setModelVersion}
+                            compact={true}
+                          />
+                        </div>
+                        <Input
+                          ref={inputRef}
+                          value={inputValue}
+                          onChange={(e) => setInputValue(e.target.value)}
+                          placeholder="Type your message..."
+                          className="flex-1 bg-background border-border focus-visible:ring-primary rounded-xl py-6 pl-[120px]"
+                          disabled={isLoading}
+                        />
+                      </div>
+                      
+                      <Button 
+                        type="submit" 
+                        disabled={isLoading || !inputValue.trim()}
+                        className="transition-all duration-200 ease-in-out"
+                      >
+                        <Send className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="max-w-5xl mx-auto w-full">
+                {messages.map((message) => (
+                  <ChatMessage key={message.id} message={message} />
+                ))}
+                
+                {isLoading && <LoadingMessage />}
+                
+                <div ref={messageEndRef} />
+              </div>
+            </>
+          )}
         </div>
         
-        <div className={`p-4 transition-all duration-300 w-full ${isNewConversation ? 'absolute bottom-0 left-0 right-0 flex justify-center' : 'border-t border-border'}`}>
-          <div className={`relative ${isNewConversation ? 'w-full max-w-xl mx-auto' : 'w-full max-w-4xl mx-auto'}`}>
-            <form 
-              onSubmit={handleSendMessage} 
-              className="flex flex-col w-full"
-            >
-              <div className="flex items-center space-x-2">
-                <div className="flex-1 relative">
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 z-10">
-                    <ModelSelector
-                      chatModel={chatModel}
-                      setChatModel={setChatModel}
-                      modelVersion={modelVersion}
-                      setModelVersion={setModelVersion}
-                      compact={true}
+        {/* Input form for ongoing conversation - fixed at the bottom */}
+        {!isNewConversation && (
+          <div className="p-4 border-t border-border w-full">
+            <div className="relative max-w-5xl mx-auto">
+              <form 
+                onSubmit={handleSendMessage} 
+                className="flex flex-col w-full"
+              >
+                <div className="flex items-center space-x-2">
+                  <div className="flex-1 relative">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 z-10">
+                      <ModelSelector
+                        chatModel={chatModel}
+                        setChatModel={setChatModel}
+                        modelVersion={modelVersion}
+                        setModelVersion={setModelVersion}
+                        compact={true}
+                      />
+                    </div>
+                    <Input
+                      ref={inputRef}
+                      value={inputValue}
+                      onChange={(e) => setInputValue(e.target.value)}
+                      placeholder="Type your message..."
+                      className="flex-1 bg-background border-border focus-visible:ring-primary rounded-xl py-6 pl-[120px]"
+                      disabled={isLoading}
                     />
                   </div>
-                  <Input
-                    ref={inputRef}
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    placeholder="Type your message..."
-                    className="flex-1 bg-background border-border focus-visible:ring-primary rounded-xl py-6 pl-[120px]"
-                    disabled={isLoading}
-                  />
+                  
+                  <Button 
+                    type="submit" 
+                    disabled={isLoading || !inputValue.trim()}
+                    className="transition-all duration-200 ease-in-out"
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
                 </div>
-                
-                <Button 
-                  type="submit" 
-                  disabled={isLoading || !inputValue.trim()}
-                  className="transition-all duration-200 ease-in-out"
-                >
-                  <Send className="h-4 w-4" />
-                </Button>
-              </div>
-            </form>
+              </form>
+            </div>
           </div>
-        </div>
+        )}
       </div>
       
       <ModelSettings 
