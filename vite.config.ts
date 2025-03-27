@@ -20,6 +20,6 @@ export default defineConfig(({ mode }) => ({
     },
   },
   // Configure base path for GitHub Pages
-  // For tim-dlaunch/gsm-custom-gpt repository
+  // For dlaunch/gsm-custom-gpt repository
   base: process.env.VITE_BASE_PATH || '/',
 }));

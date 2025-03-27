@@ -28,11 +28,11 @@ This application uses the following environment variables:
 
 ## Deployment to GitHub Pages
 
-This project is configured for deployment to GitHub Pages under the repository `tim-dlaunch/gsm-custom-gpt`.
+This project is configured for deployment to GitHub Pages under the repository `dlaunch/gsm-custom-gpt`.
 
 ### Setting up GitHub Repository Secrets
 
-1. Go to your GitHub repository: https://github.com/tim-dlaunch/gsm-custom-gpt
+1. Go to your GitHub repository: https://github.com/dlaunch/gsm-custom-gpt
 2. Navigate to Settings > Secrets and variables > Actions
 3. Add the following repository secrets:
    - `VITE_SUPABASE_URL`
@@ -48,7 +48,7 @@ The GitHub Actions workflow will automatically deploy the application to GitHub 
 ### Accessing the Deployed Application
 
 Once deployed, your application will be available at:
-https://tim-dlaunch.github.io/gsm-custom-gpt/
+https://dlaunch.github.io/gsm-custom-gpt/
 
 ## Local Development vs Production
 
