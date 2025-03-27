@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { supabase } from './supabase';
 import { useToast } from '@/hooks/use-toast';
+import { v4 as uuidv4 } from 'uuid';
 
 // Get environment variables or use fallbacks
 const getEnvVariable = (key: string, defaultValue: string = ''): string => {
@@ -92,6 +93,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           email: HARDCODED_EMAIL
         });
         
+        // Create a new conversation ID for the user
+        const newSessionId = uuidv4();
+        localStorage.setItem("currentSessionId", newSessionId);
+        
         toast({
           title: "Welcome back!",
           description: "You've successfully signed in using development credentials.",
@@ -118,6 +123,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if (data?.user) {
         console.log('Sign in successful');
+        
+        // Create a new conversation ID for the user
+        const newSessionId = uuidv4();
+        localStorage.setItem("currentSessionId", newSessionId);
+        
         toast({
           title: "Welcome back!",
           description: "You've successfully signed in.",
@@ -161,6 +171,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if (data.user) {
         console.log('Sign up successful');
+        
+        // Create a new conversation ID for the user
+        const newSessionId = uuidv4();
+        localStorage.setItem("currentSessionId", newSessionId);
+        
         toast({
           title: "Registration successful",
           description: "Please check your email for verification.",
@@ -182,6 +197,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setLoading(true);
       await supabase.auth.signOut();
+      
+      // Clear any session-related data
+      localStorage.removeItem("currentSessionId");
+      localStorage.removeItem("lastMessages");
+      
       toast({
         title: "Signed out",
         description: "You've been successfully signed out.",
