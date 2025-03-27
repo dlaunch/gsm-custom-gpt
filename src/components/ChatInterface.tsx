@@ -23,6 +23,9 @@ export function ChatInterface() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [chatModel, setChatModel] = useState<"OpenAI" | "Anthropic">("OpenAI");
   const [modelVersion, setModelVersion] = useState<string>("");
+  const [additionalPrompts, setAdditionalPrompts] = useState<string>(() => {
+    return localStorage.getItem("gsmAdditionalPrompts") || "";
+  });
   const messageEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   
@@ -33,6 +36,11 @@ export function ChatInterface() {
       setModelVersion("claude-3-7-sonnet-20250219");
     }
   }, [chatModel]);
+  
+  // Save additional prompts to localStorage when they change
+  useEffect(() => {
+    localStorage.setItem("gsmAdditionalPrompts", additionalPrompts);
+  }, [additionalPrompts]);
   
   useEffect(() => {
     const loadMessages = async () => {
@@ -94,6 +102,11 @@ export function ChatInterface() {
       modelParams.openaiModel = modelVersion;
     } else if (chatModel === "Anthropic") {
       modelParams.anthropicModel = modelVersion;
+    }
+    
+    // Add additional prompts to the payload if they exist
+    if (additionalPrompts.trim()) {
+      modelParams.additionalPrompts = additionalPrompts.trim();
     }
     
     const success = await sendMessage(inputValue, sessionId, chatModel, modelParams);
@@ -228,8 +241,8 @@ export function ChatInterface() {
       <ModelSettings 
         isOpen={isSettingsOpen} 
         onClose={() => setIsSettingsOpen(false)}
-        chatModel={chatModel}
-        setChatModel={setChatModel}
+        additionalPrompts={additionalPrompts}
+        setAdditionalPrompts={setAdditionalPrompts}
       />
     </div>
   );

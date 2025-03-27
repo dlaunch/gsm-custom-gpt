@@ -7,50 +7,60 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Textarea } from "@/components/ui/textarea";
+import { useState, useEffect } from "react";
 
 interface ModelSettingsProps {
   isOpen: boolean;
   onClose: () => void;
-  chatModel: "OpenAI" | "Anthropic";
-  setChatModel: (model: "OpenAI" | "Anthropic") => void;
+  additionalPrompts: string;
+  setAdditionalPrompts: (prompts: string) => void;
 }
 
 export function ModelSettings({ 
   isOpen, 
   onClose, 
-  chatModel, 
-  setChatModel 
+  additionalPrompts,
+  setAdditionalPrompts
 }: ModelSettingsProps) {
+  const [localPrompts, setLocalPrompts] = useState(additionalPrompts);
+  
+  // Update local state when props change
+  useEffect(() => {
+    setLocalPrompts(additionalPrompts);
+  }, [additionalPrompts]);
+  
+  const handleSave = () => {
+    setAdditionalPrompts(localPrompts);
+    onClose();
+  };
+  
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>AI Model Settings</DialogTitle>
+          <DialogTitle>Customize GSM GPT</DialogTitle>
           <DialogDescription>
-            Select which AI model you want to use for your conversations.
+            Customize how GSM GPT responds to your requests.
           </DialogDescription>
         </DialogHeader>
         
-        <div className="py-4">
-          <RadioGroup 
-            value={chatModel} 
-            onValueChange={(value) => setChatModel(value as "OpenAI" | "Anthropic")}
-            className="gap-4"
-          >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="OpenAI" id="openai" />
-              <Label htmlFor="openai" className="cursor-pointer">OpenAI</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="Anthropic" id="anthropic" />
-              <Label htmlFor="anthropic" className="cursor-pointer">Anthropic</Label>
-            </div>
-          </RadioGroup>
+        <div className="py-4 space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="additionalPrompts">Add any other tasks or prompts for GSM GPT here</Label>
+            <Textarea
+              id="additionalPrompts"
+              value={localPrompts}
+              onChange={(e) => setLocalPrompts(e.target.value)}
+              placeholder="E.g., Always include actionable steps, Focus on B2B marketing strategies, etc."
+              className="min-h-[120px]"
+            />
+          </div>
         </div>
         
-        <div className="flex justify-end">
-          <Button onClick={onClose}>Close</Button>
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button onClick={handleSave}>Save Changes</Button>
         </div>
       </DialogContent>
     </Dialog>
