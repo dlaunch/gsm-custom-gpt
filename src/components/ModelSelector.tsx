@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useEffect } from "react";
 
 interface ModelSelectorProps {
   chatModel: "OpenAI" | "Anthropic";
@@ -63,7 +64,9 @@ export function ModelSelector({
   };
 
   const handleSelectModel = (model: ModelOption) => {
+    // First update the model version
     setModelVersion(model.value);
+    // Then update the chat model provider
     setChatModel(model.provider);
   };
 

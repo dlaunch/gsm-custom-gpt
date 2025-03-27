@@ -22,7 +22,7 @@ export function ChatInterface() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [chatModel, setChatModel] = useState<"OpenAI" | "Anthropic">("OpenAI");
-  const [modelVersion, setModelVersion] = useState<string>("");
+  const [modelVersion, setModelVersion] = useState<string>("gpt-4o");
   const [additionalPrompts, setAdditionalPrompts] = useState<string>(() => {
     return localStorage.getItem("gsmAdditionalPrompts") || "";
   });
@@ -32,14 +32,6 @@ export function ChatInterface() {
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const previousSessionIdRef = useRef<string | null>(null);
-  
-  useEffect(() => {
-    if (chatModel === "OpenAI") {
-      setModelVersion("gpt-4o");
-    } else if (chatModel === "Anthropic") {
-      setModelVersion("claude-3-7-sonnet-20250219");
-    }
-  }, [chatModel]);
   
   // Save additional prompts to localStorage when they change
   useEffect(() => {
