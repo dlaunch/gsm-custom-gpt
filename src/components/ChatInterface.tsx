@@ -26,8 +26,12 @@ export function ChatInterface() {
   const [additionalPrompts, setAdditionalPrompts] = useState<string>(() => {
     return localStorage.getItem("gsmAdditionalPrompts") || "";
   });
+  const [isLoadingMessages, setIsLoadingMessages] = useState(true);
+  const [shouldScrollToBottom, setShouldScrollToBottom] = useState(false);
   const messageEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const previousSessionIdRef = useRef<string | null>(null);
   
   useEffect(() => {
     if (chatModel === "OpenAI") {
@@ -42,17 +46,54 @@ export function ChatInterface() {
     localStorage.setItem("gsmAdditionalPrompts", additionalPrompts);
   }, [additionalPrompts]);
   
+  // Handle scrolling when messages change or when shouldScrollToBottom is true
+  useEffect(() => {
+    if (shouldScrollToBottom && messageEndRef.current && !isLoadingMessages) {
+      messageEndRef.current.scrollIntoView({ behavior: "smooth" });
+      setShouldScrollToBottom(false);
+    }
+  }, [messages, shouldScrollToBottom, isLoadingMessages]);
+  
+  // Load messages when sessionId changes
   useEffect(() => {
     const loadMessages = async () => {
-      const messagesData = await getMessages(sessionId);
-      setMessages(messagesData);
+      setIsLoadingMessages(true);
+      
+      // Check if this is a session change
+      const isSessionChange = previousSessionIdRef.current !== null && 
+                             previousSessionIdRef.current !== sessionId;
+      
+      // Update the previous session ID
+      previousSessionIdRef.current = sessionId;
+      
+      // Save the current session ID to localStorage
+      localStorage.setItem("currentSessionId", sessionId);
+      
+      try {
+        const messagesData = await getMessages(sessionId);
+        
+        // Update messages state
+        setMessages(messagesData);
+        
+        // Determine if we should scroll to bottom
+        // Only scroll to bottom for new conversations or session changes
+        if (isSessionChange || messagesData.length === 0) {
+          setShouldScrollToBottom(true);
+        }
+      } catch (error) {
+        console.error("Error loading messages:", error);
+        toast.error("Failed to load messages");
+      } finally {
+        // Set loading to false after a short delay to ensure DOM has updated
+        setTimeout(() => {
+          setIsLoadingMessages(false);
+        }, 50);
+      }
     };
     
     loadMessages();
     
-    // Save the current session ID to localStorage
-    localStorage.setItem("currentSessionId", sessionId);
-    
+    // Set up subscription for real-time updates
     const subscription = subscribeToMessages(sessionId, (newMessage) => {
       // Only add AI messages from the subscription
       // User messages are added directly in the handleSendMessage function
@@ -62,7 +103,10 @@ export function ChatInterface() {
           if (exists) {
             return prev;
           }
-          return [...prev, newMessage];
+          const updatedMessages = [...prev, newMessage];
+          // Scroll to bottom when receiving a new AI message
+          setShouldScrollToBottom(true);
+          return updatedMessages;
         });
       }
       setIsLoading(false);
@@ -72,10 +116,6 @@ export function ChatInterface() {
       subscription.unsubscribe();
     };
   }, [sessionId]);
-  
-  useEffect(() => {
-    messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
   
   const handleSendMessage = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -93,6 +133,9 @@ export function ChatInterface() {
     
     // Add the user message to the messages state
     setMessages(prev => [...prev, userMessageObj]);
+    
+    // Scroll to bottom when sending a message
+    setShouldScrollToBottom(true);
     
     setInputValue("");
     setIsLoading(true);
@@ -121,10 +164,13 @@ export function ChatInterface() {
     const newSessionId = uuidv4();
     setSessionId(newSessionId);
     setMessages([]);
+    setShouldScrollToBottom(true);
   };
   
   const handleSessionSelect = (selectedSessionId: string) => {
-    setSessionId(selectedSessionId);
+    if (selectedSessionId !== sessionId) {
+      setSessionId(selectedSessionId);
+    }
   };
 
   const handlePromptShortcut = (promptTemplate: string) => {
@@ -158,9 +204,17 @@ export function ChatInterface() {
           </Button>
         </div>
         
-        <div className="flex-1 overflow-y-auto p-6">
+        <div 
+          ref={chatContainerRef}
+          className="flex-1 overflow-y-auto p-6"
+          style={{ position: 'relative' }}
+        >
           <div className="max-w-4xl mx-auto">
-            {isNewConversation ? (
+            {isLoadingMessages ? (
+              <div className="flex justify-center items-center h-16">
+                <LoadingMessage />
+              </div>
+            ) : isNewConversation ? (
               <div className="h-full flex items-center justify-center">
                 <div className="text-center max-w-md w-full">
                   <h2 className="text-2xl font-bold mb-2 text-foreground/80">GSM Custom GPT</h2>
